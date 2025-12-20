@@ -16,22 +16,39 @@ const TelegramService = {
         
         const tg = window.Telegram?.WebApp;
         
-        if (tg?.initData) {
-            // Реальный Telegram Web App
+        // Подробное логирование для отладки
+        console.log('🔍 TelegramService init:');
+        console.log('   - window.Telegram:', !!window.Telegram);
+        console.log('   - WebApp:', !!tg);
+        console.log('   - initData:', tg?.initData ? 'есть (' + tg.initData.length + ' символов)' : 'нет');
+        console.log('   - initDataUnsafe:', tg?.initDataUnsafe);
+        console.log('   - user:', tg?.initDataUnsafe?.user);
+        
+        if (tg?.initDataUnsafe?.user) {
+            // Реальный Telegram Web App с данными пользователя
             tg.ready();
             tg.expand();  // Развернуть на весь экран
             
             this._user = this._extractTelegramUser(tg);
             this._applyTelegramTheme(tg);
             
-            this._log('✅ Telegram Web App инициализирован', this._user);
+            console.log('✅ Telegram Web App инициализирован', this._user);
+        } else if (tg) {
+            // Telegram Web App есть, но нет данных пользователя
+            tg.ready();
+            tg.expand();
+            this._applyTelegramTheme(tg);
+            
+            console.warn('⚠️ Telegram WebApp есть, но user данные отсутствуют');
+            console.warn('   Проверьте настройки бота в @BotFather');
+            this._user = null;
         } else if (this._isDevMode()) {
             // Режим разработки — используем мок
             this._user = this._createMockUser();
-            this._log('🔧 DEV MODE: Используем мок-пользователя', this._user);
+            console.log('🔧 DEV MODE: Используем мок-пользователя', this._user);
         } else {
             // Не в Telegram и не dev mode
-            this._log('⚠️ Telegram Web App недоступен');
+            console.log('⚠️ Telegram Web App недоступен (не в Telegram)');
             this._user = null;
         }
         
