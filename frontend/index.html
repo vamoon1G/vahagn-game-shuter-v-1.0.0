@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AR Gesture Shooter</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- ============================================ -->
+    <!-- HUB PAGE -->
+    <!-- ============================================ -->
+    <div id="hub">
+        <header class="hub-header">
+            <div class="hub-logo">
+                <img src="img/logo.png" alt="Logo">
+            </div>
+        </header>
+        
+        <main class="hub-main">
+            <section class="hub-hero">
+                <div class="hero-visual">
+                    <img src="img/hero.png" alt="Hero" class="hero-image">
+                </div>
+                <div class="hero-content">
+                    <h1 class="hero-title">Стреляй<br>жестами</h1>
+                    <p class="hero-subtitle">Управляй игрой с помощью жестов руки. Используй камеру для отслеживания движений и уничтожай мишени.</p>
+                    <button class="btn-primary" id="start-game-btn">
+                        <span>Начать игру</span>
+                        <span class="arrow">↗</span>
+                    </button>
+                </div>
+            </section>
+            
+            <section class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">👆</div>
+                    <div class="feature-title">Распознавание жестов в реальном времени</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-title">Магнитный прицел с автоматическим наведением</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✨</div>
+                    <div class="feature-title">Красивые эффекты и физика столкновений</div>
+                </div>
+            </section>
+        </main>
+                </div>
+                
+    <!-- ============================================ -->
+    <!-- LEADERBOARD SCREEN -->
+    <!-- ============================================ -->
+    <div id="leaderboard-screen">
+        <h1 class="leaderboard-title">Рейтинг</h1>
+                    <div class="leaderboard-tabs">
+                        <button class="leaderboard-tab active" data-type="score">Очки</button>
+                        <button class="leaderboard-tab" data-type="hits">Попадания</button>
+                        <button class="leaderboard-tab" data-type="accuracy">Точность</button>
+                </div>
+                <div class="leaderboard-table" id="leaderboard-table">
+                    <div class="leaderboard-row header">
+                        <div>#</div>
+                        <div>Игрок</div>
+                        <div>Счёт</div>
+                        <div>Мишеней</div>
+                    </div>
+                    <div class="leaderboard-loading" id="leaderboard-loading">
+                        <div class="loader"></div>
+                        <div>Загрузка рейтинга...</div>
+                    </div>
+                    <div class="leaderboard-empty" id="leaderboard-empty" style="display: none;">
+                        Ещё нет результатов. Будь первым!
+                    </div>
+                    <div id="leaderboard-body"></div>
+                </div>
+    </div>
+    
+    <!-- ============================================ -->
+    <!-- PROFILE SCREEN -->
+    <!-- ============================================ -->
+    <div id="profile-screen">
+        <header class="profile-header">
+            <div class="profile-avatar" id="profile-avatar">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+                </svg>
+                    </div>
+            <div class="profile-name" id="profile-display-name">Гость</div>
+            <div class="profile-username" id="profile-username">Войдите через Telegram</div>
+        </header>
+        
+        <div class="profile-stats">
+            <div class="profile-stat">
+                <div class="profile-stat-value" id="profile-total-score">0</div>
+                <div class="profile-stat-label">Очков</div>
+                    </div>
+            <div class="profile-stat">
+                <div class="profile-stat-value" id="profile-games">0</div>
+                <div class="profile-stat-label">Игр</div>
+                </div>
+            <div class="profile-stat">
+                <div class="profile-stat-value" id="profile-rank">—</div>
+                <div class="profile-stat-label">Место</div>
+                    </div>
+                </div>
+        
+        <div class="profile-section">
+            <div class="profile-section-title">История игр</div>
+            <div class="profile-history" id="profile-history">
+                <div class="profile-empty" id="profile-empty">
+                    Сыграй свою первую игру!
+            </div>
+            </div>
+        </div>
+        
+        <div class="profile-section">
+            <div class="profile-section-title">Контакты</div>
+            <div class="profile-contact">
+                <div class="contact-info">
+                    <div class="contact-label">Разработчик</div>
+                    <div class="contact-name">vahagn & co</div>
+                </div>
+                <a href="https://t.me/Mr_Aregak" target="_blank" class="contact-link">
+                            <svg viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    @Mr_Aregak
+                        </a>
+                    </div>
+                </div>
+        
+        <div class="profile-version">
+            AR Gesture Shooter v1.0 • © 2025-2026 vahagn & co
+                    </div>
+                </div>
+    
+    <!-- ============================================ -->
+    <!-- WEAPONS SCREEN -->
+    <!-- ============================================ -->
+    <div id="weapons-screen">
+        <header class="weapons-header">
+            <h1 class="weapons-title">Арсенал</h1>
+            <p class="weapons-subtitle">Выбери оружие для игры</p>
+        </header>
+        
+        <div class="weapons-list">
+            <!-- Пистолет -->
+            <div class="weapon-card selected" data-weapon="pistol">
+                <div class="weapon-top">
+                    <div class="weapon-icon">
+                        <img src="img/weapon-pistol.png" alt="Пистолет" onerror="this.style.display='none'">
+            </div>
+                    <div class="weapon-info">
+                        <div class="weapon-name">Пистолет</div>
+                        <div class="weapon-desc">Одна рука • Классический режим</div>
+                    </div>
+                </div>
+                <div class="weapon-stats">
+                    <div class="weapon-stat">
+                        <div class="stat-label">Перезарядка</div>
+                        <div class="stat-bar"><div class="stat-bar-fill" style="width: 70%"></div></div>
+                        <div class="stat-value">0.4с</div>
+                    </div>
+                    <div class="weapon-stat">
+                        <div class="stat-label">Макс. комбо</div>
+                        <div class="stat-bar"><div class="stat-bar-fill" style="width: 100%"></div></div>
+                        <div class="stat-value">x10</div>
+                    </div>
+                    <div class="weapon-stat">
+                        <div class="stat-label">Точность</div>
+                        <div class="stat-bar"><div class="stat-bar-fill" style="width: 80%"></div></div>
+                        <div class="stat-value">Высокая</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Двойные пистолеты -->
+            <div class="weapon-card" data-weapon="dual">
+                <div class="weapon-top">
+                    <div class="weapon-icon">
+                        <img src="img/weapon-dual.png" alt="Двойные" onerror="this.style.display='none'">
+                    </div>
+                    <div class="weapon-info">
+                        <div class="weapon-name">Двойные пистолеты</div>
+                        <div class="weapon-desc">Две руки • Два прицела</div>
+                    </div>
+                </div>
+                <div class="weapon-stats">
+                    <div class="weapon-stat">
+                        <div class="stat-label">Перезарядка</div>
+                        <div class="stat-bar"><div class="stat-bar-fill" style="width: 50%"></div></div>
+                        <div class="stat-value">0.5с</div>
+                    </div>
+                    <div class="weapon-stat">
+                        <div class="stat-label">Макс. комбо</div>
+                        <div class="stat-bar"><div class="stat-bar-fill" style="width: 60%"></div></div>
+                        <div class="stat-value">x6</div>
+                    </div>
+                    <div class="weapon-stat">
+                        <div class="stat-label">Урон</div>
+                        <div class="stat-bar"><div class="stat-bar-fill" style="width: 100%"></div></div>
+                        <div class="stat-value">×2</div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- ============================================ -->
+    <!-- BOTTOM NAVIGATION BAR -->
+    <!-- ============================================ -->
+    <nav class="bottom-nav" id="bottom-nav">
+        <button class="nav-item" data-screen="weapons">
+            <span class="nav-icon">
+                <img src="img/pric.png" alt="Оружие">
+            </span>
+        </button>
+        <button class="nav-item active" data-screen="hub">
+            <span class="nav-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1V9.5z" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+        </button>
+        <button class="nav-item" data-screen="leaderboard">
+            <span class="nav-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 9H4a2 2 0 01-2-2V5a2 2 0 012-2h2M18 9h2a2 2 0 002-2V5a2 2 0 00-2-2h-2M6 9V5a2 2 0 012-2h8a2 2 0 012 2v4M6 9a6 6 0 006 6 6 6 0 006-6M12 15v3M8 21h8M10 18h4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+        </button>
+        <button class="nav-item" data-screen="profile">
+            <span class="nav-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="8" r="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+        </button>
+    </nav>
+    
+    <!-- ============================================ -->
+    <!-- GAME SCREEN -->
+    <!-- ============================================ -->
+    <div id="game-screen">
+        <div id="loading-overlay">
+            <div class="loader"></div>
+            <div class="loading-text" id="loading-status">Загрузка...</div>
+        </div>
+        
+        <div id="background">
+            <div class="bg-stars"></div>
+        </div>
+        
+        <div id="camera-pip">
+            <video id="webcam" autoplay playsinline></video>
+            <canvas id="tracking-canvas"></canvas>
+        </div>
+        
+        <canvas id="game-canvas"></canvas>
+        <canvas id="laser-canvas"></canvas>
+        
+        <div class="jerk-flash" id="jerk-flash"></div>
+        
+        <div class="speed-meter" id="speed-meter">
+            <div class="speed-bar" id="speed-bar"></div>
+            <div class="speed-threshold"></div>
+        </div>
+        
+        <div class="shoot-hint" id="shoot-hint">↗ Отдёрни назад + вверх</div>
+        
+        <!-- Dual Crosshairs -->
+        <div class="crosshair-dual left" id="crosshair-left"></div>
+        <div class="crosshair-dual right" id="crosshair-right"></div>
+        
+        <!-- Game Timer -->
+        <div class="game-timer" id="game-timer" style="display: none;">
+            <div class="timer-value" id="timer-value">60</div>
+            <div class="timer-label">Секунд</div>
+        </div>
+        
+        <!-- Game End Overlay -->
+        <div class="game-end-overlay" id="game-end-overlay">
+            <div class="game-end-panel">
+                <h2 class="game-end-title">Игра окончена!</h2>
+                <p class="game-end-subtitle" id="end-subtitle">Отличный результат</p>
+                
+                <div class="username-section">
+                    <input type="text" class="username-input" id="username-input" 
+                           placeholder="Твоё имя (для рейтинга)" maxlength="32">
+                </div>
+                
+                <div class="game-end-stats">
+                    <div class="stat-card highlight">
+                        <div class="stat-value" id="end-score">0</div>
+                        <div class="stat-label">Очков</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="end-hits">0</div>
+                        <div class="stat-label">Попаданий</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="end-accuracy">0%</div>
+                        <div class="stat-label">Точность</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="end-combo">x1</div>
+                        <div class="stat-label">Макс. комбо</div>
+                    </div>
+                </div>
+                
+                <div class="game-end-rank" id="end-rank-section" style="display: none;">
+                    <div class="rank-label">Твоя позиция в рейтинге</div>
+                    <div class="rank-value" id="end-rank">#1</div>
+                </div>
+                
+                <div class="game-end-actions">
+                    <button class="btn-end btn-play-again" id="btn-play-again">Ещё раз</button>
+                    <button class="btn-end btn-to-menu" id="btn-to-menu">В меню</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="game-hud">
+            <div class="game-score">
+                <div class="score-item">
+                    <div class="score-label">Очки</div>
+                    <div class="score-value" id="score">0</div>
+                </div>
+                <div class="score-item combo">
+                    <div class="score-label">Комбо</div>
+                    <div class="score-value" id="combo">x1</div>
+                </div>
+            </div>
+            
+            <button class="settings-btn" id="settings-btn">
+                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+            </button>
+            
+            <div class="gesture-indicator" id="gesture-indicator" style="display: flex;">
+                <span class="gesture-icon" id="gesture-icon">✋</span>
+                <span class="gesture-text" id="gesture-text">Покажи руку</span>
+            </div>
+        </div>
+        
+        <div class="crosshair" id="crosshair" style="display: none;">
+            <div class="crosshair-ring" id="crosshair-ring"></div>
+            <div class="crosshair-dot" id="crosshair-dot"></div>
+        </div>
+        
+        <!-- Settings Modal -->
+        <div class="settings-modal" id="settings-modal">
+            <div class="settings-panel">
+                <div class="settings-title">Настройки</div>
+                
+                <div class="setting-row">
+                    <span class="setting-label">Показать камеру</span>
+                    <div class="toggle active" id="toggle-camera"></div>
+                </div>
+                
+                <div class="setting-row">
+                    <span class="setting-label">Звук</span>
+                    <div class="toggle active" id="toggle-sound"></div>
+                </div>
+                
+                <div class="setting-row">
+                    <span class="setting-label">Индикаторы</span>
+                    <div class="toggle active" id="toggle-indicators"></div>
+                </div>
+                
+                <div class="setting-row sensitivity-row">
+                    <span class="setting-label">Чувствительность</span>
+                    <div class="sensitivity-control">
+                        <input type="range" id="sensitivity-slider" min="20" max="60" value="35" class="slider">
+                        <span class="sensitivity-value" id="sensitivity-value">35%</span>
+                    </div>
+                </div>
+                
+                <div class="settings-actions">
+                    <button class="btn-settings btn-close-settings" id="close-settings">Продолжить</button>
+                    <button class="btn-settings btn-exit-game" id="exit-game">Выйти в меню</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Three.js & MediaPipe -->
+    <script src="https://unpkg.com/three@0.150.1/build/three.min.js"></script>
+    <script src="https://unpkg.com/@mediapipe/hands@0.4.1646424915/hands.js"></script>
+    <script src="https://unpkg.com/@mediapipe/camera_utils@0.3.1640029074/camera_utils.js"></script>
+    <!-- App Config (можно удалить для production) -->
+    <script src="js/config.js"></script>
+    <!-- Telegram Service -->
+    <script src="js/telegram.js"></script>
+    <!-- Перемещенная часть js из html -->
+    <script src="js/game.js"></script>
+</body>
+</html>
