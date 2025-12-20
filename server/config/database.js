@@ -6,12 +6,13 @@
 const mysql = require('mysql2/promise');
 
 // Конфигурация из переменных окружения
+// Поддержка Railway (MYSQL*) и стандартных (DB_*) переменных
 const dbConfig = {
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT, 10) || 3306,
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'ar_shooter',
+    host: process.env.MYSQLHOST || process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.MYSQLPORT || process.env.DB_PORT, 10) || 3306,
+    user: process.env.MYSQLUSER || process.env.DB_USER || 'root',
+    password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD || '',
+    database: process.env.MYSQLDATABASE || process.env.DB_NAME || 'ar_shooter',
     
     // Настройки пула соединений
     waitForConnections: true,
