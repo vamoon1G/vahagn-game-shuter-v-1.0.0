@@ -41,11 +41,13 @@ function setupHelmet() {
             directives: {
                 defaultSrc: ["'self'"],
                 // 'unsafe-eval' и 'wasm-unsafe-eval' нужны для MediaPipe WASM
-                scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "'wasm-unsafe-eval'", "unpkg.com", "cdn.jsdelivr.net", "blob:"],
+                // telegram.org нужен для Telegram Web App SDK
+                scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "'wasm-unsafe-eval'", "unpkg.com", "cdn.jsdelivr.net", "telegram.org", "*.telegram.org", "blob:"],
                 styleSrc: ["'self'", "'unsafe-inline'", "fonts.googleapis.com"],
                 fontSrc: ["'self'", "fonts.gstatic.com"],
-                imgSrc: ["'self'", "data:", "blob:"],
-                connectSrc: ["'self'", "unpkg.com", "cdn.jsdelivr.net", "blob:"],
+                imgSrc: ["'self'", "data:", "blob:", "t.me", "*.telegram.org"],
+                connectSrc: ["'self'", "unpkg.com", "cdn.jsdelivr.net", "telegram.org", "*.telegram.org", "blob:"],
+                frameSrc: ["'self'", "telegram.org", "*.telegram.org"], // Для iframe Telegram
                 mediaSrc: ["'self'", "blob:"],
                 workerSrc: ["'self'", "blob:"], // Для Web Workers
             },
