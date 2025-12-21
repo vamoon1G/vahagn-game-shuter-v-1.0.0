@@ -110,10 +110,34 @@ function setupCors() {
     return (req, res, next) => {
         const origin = req.get('Origin');
         
+        // Логируем origin для отладки
+        if (origin) {
+            console.log('🌐 Request origin:', origin);
+        }
+        
+        // Разрешаем запросы без origin (same-origin, мобильные приложения, Telegram WebView)
+        if (!origin) {
+            res.header('Access-Control-Allow-Origin', '*');
+        }
         // В development разрешаем все
-        if (process.env.NODE_ENV === 'development') {
-            res.header('Access-Control-Allow-Origin', origin || '*');
-        } else if (origin && allowedOrigins.includes(origin)) {
+        else if (process.env.NODE_ENV === 'development') {
+            res.header('Access-Control-Allow-Origin', origin);
+        }
+        // Telegram Web App домены
+        else if (origin.includes('telegram.org') || origin.includes('t.me') || origin.includes('web.telegram.org')) {
+            res.header('Access-Control-Allow-Origin', origin);
+        }
+        // Разрешённые домены из env
+        else if (allowedOrigins.includes(origin)) {
+            res.header('Access-Control-Allow-Origin', origin);
+        }
+        // Наш собственный домен (Render)
+        else if (origin.includes('onrender.com')) {
+            res.header('Access-Control-Allow-Origin', origin);
+        }
+        // Fallback - разрешаем всем (для Telegram WebView который может иметь разные origins)
+        else {
+            console.log('⚠️ Unknown origin, allowing:', origin);
             res.header('Access-Control-Allow-Origin', origin);
         }
         

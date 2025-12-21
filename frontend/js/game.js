@@ -151,11 +151,17 @@ const DebugLogger = {
         this._container.innerHTML = `
             <div class="debug-header">
                 <span>📋 Логи</span>
-                <button onclick="DebugLogger.toggle()">−</button>
-                <button onclick="DebugLogger.close()">×</button>
+                <button id="debug-toggle-btn">−</button>
+                <button id="debug-close-btn">×</button>
             </div>
             <div class="debug-content"></div>
         `;
+        
+        // Добавляем обработчики после создания элементов
+        setTimeout(() => {
+            document.getElementById('debug-toggle-btn')?.addEventListener('click', () => this.toggle());
+            document.getElementById('debug-close-btn')?.addEventListener('click', () => this.close());
+        }, 0);
         this._container.style.cssText = `
             position: fixed;
             top: 10px;
@@ -297,9 +303,16 @@ const ApiService = {
                 return { success: false, error: 'Timeout' };
             }
             
-            DebugLogger.error(`${method} ${endpoint} → ${error.message}`);
+            // Детальная информация об ошибке
+            const errorInfo = `${error.name}: ${error.message}`;
+            DebugLogger.error(`${method} ${endpoint} → ${errorInfo}`);
             
-            console.error('API Error:', error.message);
+            // Если это TypeError, может быть проблема с сетью/CORS
+            if (error instanceof TypeError) {
+                DebugLogger.warn('Network/CORS error - check server');
+            }
+            
+            console.error('API Error:', errorInfo);
             return { success: false, error: error.message };
         }
     },
