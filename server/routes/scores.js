@@ -11,6 +11,7 @@ const {
     validateLeaderboardQuery 
 } = require('../middleware/validation');
 const { createScoreLimiter } = require('../middleware/security');
+const telegramLogger = require('../utils/telegramLogger');
 
 /**
  * POST /api/scores
@@ -106,6 +107,17 @@ router.post('/', createScoreLimiter(), validateGameResult, async (req, res, next
         
         console.log('✅ Score saved with id:', result.insertId);
         
+        // Логируем в Telegram
+        await telegramLogger.logScore({
+            telegramId,
+            sessionId,
+            score,
+            targetsHit,
+            maxCombo,
+            userId,
+            scoreId: result.insertId,
+        });
+        
         // Получаем позицию в рейтинге
         const [rankResult] = await db.query(
             `SELECT COUNT(*) + 1 as \`rank\` 
@@ -127,6 +139,8 @@ router.post('/', createScoreLimiter(), validateGameResult, async (req, res, next
         });
         
     } catch (error) {
+        // Логируем ошибку в Telegram
+        await telegramLogger.logError('POST /api/scores', error);
         next(error);
     }
 });
