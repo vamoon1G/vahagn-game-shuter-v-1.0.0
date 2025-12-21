@@ -17,7 +17,8 @@ const { createScoreLimiter } = require('../middleware/security');
  * Сохранить результат игры
  * Поддерживает аутентификацию через Telegram ID или Session ID
  */
-router.post('/', createScoreLimiter(), validateGameResult, async (req, res, next) => {
+// Временно убрали createScoreLimiter() для отладки
+router.post('/', validateGameResult, async (req, res, next) => {
     try {
         // Логируем входящие данные (без sensitive)
         const logBody = { ...req.body };
