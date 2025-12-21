@@ -49,7 +49,7 @@ router.post('/', validateGameResult, async (req, res, next) => {
         if (telegramId) {
             console.log('🔍 Looking up user by telegramId:', telegramId);
             const users = await db.query(
-                'SELECT id FROM users WHERE telegram_id = ?',
+                'SELECT id, username FROM users WHERE telegram_id = ?',
                 [telegramId]
             );
             user = users[0];
@@ -58,15 +58,45 @@ router.post('/', validateGameResult, async (req, res, next) => {
             if (!user) {
                 // Создаём пользователя по Telegram ID
                 console.log('📝 Creating new user for telegramId:', telegramId);
+                
+                // Извлекаем username из initData
+                let username = null;
+                if (initData) {
+                    try {
+                        const urlParams = new URLSearchParams(initData);
+                        const userJson = urlParams.get('user');
+                        if (userJson) {
+                            const tgUser = JSON.parse(userJson);
+                            username = tgUser.username || tgUser.first_name || null;
+                        }
+                    } catch (e) {}
+                }
+                
                 const result = await db.query(
-                    'INSERT INTO users (telegram_id, session_id) VALUES (?, UUID())',
-                    [telegramId]
+                    'INSERT INTO users (telegram_id, session_id, username) VALUES (?, UUID(), ?)',
+                    [telegramId, username]
                 );
                 userId = result.insertId;
-                console.log('✅ Created user with id:', userId);
+                console.log('✅ Created user with id:', userId, 'username:', username);
             } else {
                 userId = user.id;
                 console.log('✅ Using existing user:', userId);
+                
+                // Обновляем username если пустой
+                if (!user.username && initData) {
+                    try {
+                        const urlParams = new URLSearchParams(initData);
+                        const userJson = urlParams.get('user');
+                        if (userJson) {
+                            const tgUser = JSON.parse(userJson);
+                            const username = tgUser.username || tgUser.first_name || null;
+                            if (username) {
+                                await db.query('UPDATE users SET username = ? WHERE id = ?', [username, userId]);
+                                console.log('✅ Updated username:', username);
+                            }
+                        }
+                    } catch (e) {}
+                }
             }
         }
         // Приоритет 2: Session ID
@@ -287,14 +317,41 @@ router.get('/user/telegram/:telegramId', async (req, res, next) => {
         
         // Если пользователь не найден — создаём его
         if (!user) {
+            // Пытаемся получить username из initData
+            let username = null;
+            if (req.body.initData) {
+                try {
+                    const urlParams = new URLSearchParams(req.body.initData);
+                    const userJson = urlParams.get('user');
+                    if (userJson) {
+                        const tgUser = JSON.parse(userJson);
+                        username = tgUser.username || tgUser.first_name || null;
+                    }
+                } catch (e) {}
+            }
+            
             const result = await db.query(
-                'INSERT INTO users (telegram_id, session_id) VALUES (?, UUID())',
-                [telegramId]
+                'INSERT INTO users (telegram_id, session_id, username) VALUES (?, UUID(), ?)',
+                [telegramId, username]
             );
             [user] = await db.query(
                 'SELECT id, username, created_at FROM users WHERE id = ?',
                 [result.insertId]
             );
+        }
+        // Обновляем username если он пустой
+        else if (!user.username && req.body.initData) {
+            try {
+                const urlParams = new URLSearchParams(req.body.initData);
+                const userJson = urlParams.get('user');
+                if (userJson) {
+                    const tgUser = JSON.parse(userJson);
+                    const username = tgUser.username || tgUser.first_name || null;
+                    if (username) {
+                        await db.query('UPDATE users SET username = ? WHERE id = ?', [username, user.id]);
+                    }
+                }
+            } catch (e) {}
         }
         
         // Получаем статистику

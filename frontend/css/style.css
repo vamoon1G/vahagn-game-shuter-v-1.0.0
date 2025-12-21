@@ -92,6 +92,11 @@ body {
     width: auto;
 }
 
+/* Лого белое в тёмной теме */
+[data-theme="dark"] .hub-logo img {
+    filter: invert(1) brightness(2);
+}
+
 .hub-main {
     flex: 1;
     display: flex;
