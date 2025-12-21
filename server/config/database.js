@@ -155,10 +155,45 @@ async function initSchema() {
         await query(createUsersTable);
         await query(createScoresTable);
         await query(createStatsView);
+        
+        // Миграция: добавляем telegram_id если его нет
+        await migrateAddTelegramId();
+        
         console.log('✅ Схема БД инициализирована');
     } catch (error) {
         console.error('❌ Ошибка инициализации схемы:', error.message);
         throw error;
+    }
+}
+
+/**
+ * Миграция: добавить telegram_id если колонка не существует
+ */
+async function migrateAddTelegramId() {
+    try {
+        // Проверяем существует ли колонка
+        const [columns] = await query(`
+            SELECT COLUMN_NAME 
+            FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE TABLE_SCHEMA = DATABASE() 
+            AND TABLE_NAME = 'users' 
+            AND COLUMN_NAME = 'telegram_id'
+        `);
+        
+        if (!columns || (Array.isArray(columns) && columns.length === 0) || !columns.COLUMN_NAME) {
+            console.log('📦 Добавляем колонку telegram_id в users...');
+            await query(`
+                ALTER TABLE users 
+                ADD COLUMN telegram_id BIGINT UNSIGNED DEFAULT NULL UNIQUE,
+                ADD INDEX idx_telegram_id (telegram_id)
+            `);
+            console.log('✅ Колонка telegram_id добавлена');
+        }
+    } catch (error) {
+        // Игнорируем если колонка уже существует (duplicate column error)
+        if (error.code !== 'ER_DUP_FIELDNAME' && !error.message.includes('Duplicate column')) {
+            console.error('⚠️ Ошибка миграции telegram_id:', error.message);
+        }
     }
 }
 
