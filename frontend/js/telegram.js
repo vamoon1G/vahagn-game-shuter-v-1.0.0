@@ -16,17 +16,6 @@ const TelegramService = {
         
         const tg = window.Telegram?.WebApp;
         
-        // Подробное логирование для отладки
-        console.log('🔍 TelegramService init:');
-        console.log('   - window.Telegram:', !!window.Telegram);
-        console.log('   - WebApp:', !!tg);
-        console.log('   - initData:', tg?.initData ? 'есть (' + tg.initData.length + ' символов)' : 'нет');
-        console.log('   - initDataUnsafe:', tg?.initDataUnsafe);
-        console.log('   - user:', tg?.initDataUnsafe?.user);
-        
-        // ВРЕМЕННО: Показываем отладочную информацию на экране
-        this._showDebugInfo(tg);
-        
         if (tg?.initDataUnsafe?.user) {
             // Реальный Telegram Web App с данными пользователя
             tg.ready();
@@ -34,76 +23,21 @@ const TelegramService = {
             
             this._user = this._extractTelegramUser(tg);
             this._applyTelegramTheme(tg);
-            
-            console.log('✅ Telegram Web App инициализирован', this._user);
         } else if (tg) {
             // Telegram Web App есть, но нет данных пользователя
             tg.ready();
             tg.expand();
             this._applyTelegramTheme(tg);
-            
-            console.warn('⚠️ Telegram WebApp есть, но user данные отсутствуют');
-            console.warn('   Проверьте настройки бота в @BotFather');
             this._user = null;
         } else if (this._isDevMode()) {
             // Режим разработки — используем мок
             this._user = this._createMockUser();
-            console.log('🔧 DEV MODE: Используем мок-пользователя', this._user);
         } else {
             // Не в Telegram и не dev mode
-            console.log('⚠️ Telegram Web App недоступен (не в Telegram)');
             this._user = null;
         }
         
         return this._user;
-    },
-    
-    /**
-     * ВРЕМЕННО: Показать отладочную информацию на экране
-     */
-    _showDebugInfo(tg) {
-        // Создаём отладочный блок
-        const debugDiv = document.createElement('div');
-        debugDiv.id = 'tg-debug';
-        debugDiv.style.cssText = `
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.9);
-            color: #0f0;
-            padding: 15px;
-            font-family: monospace;
-            font-size: 11px;
-            z-index: 99999;
-            border-radius: 8px;
-            max-height: 40vh;
-            overflow: auto;
-        `;
-        
-        const info = {
-            'window.Telegram': !!window.Telegram,
-            'WebApp': !!tg,
-            'initData': tg?.initData ? `✅ (${tg.initData.length} chars)` : '❌ нет',
-            'initDataUnsafe': tg?.initDataUnsafe ? '✅ есть' : '❌ нет',
-            'user': tg?.initDataUnsafe?.user ? '✅ есть' : '❌ НЕТ ДАННЫХ',
-            'user.id': tg?.initDataUnsafe?.user?.id || 'N/A',
-            'user.username': tg?.initDataUnsafe?.user?.username || 'N/A',
-            'user.first_name': tg?.initDataUnsafe?.user?.first_name || 'N/A',
-            'platform': tg?.platform || 'N/A',
-            'version': tg?.version || 'N/A',
-        };
-        
-        let html = '<b>🔍 Telegram Debug Info:</b><br><br>';
-        for (const [key, value] of Object.entries(info)) {
-            const color = String(value).includes('❌') ? '#f55' : '#0f0';
-            html += `<span style="color:${color}">${key}: ${value}</span><br>`;
-        }
-        
-        html += '<br><button onclick="document.getElementById(\'tg-debug\').remove()" style="background:#333;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;">Закрыть</button>';
-        
-        debugDiv.innerHTML = html;
-        document.body.appendChild(debugDiv);
     },
     
     /**
@@ -168,8 +102,13 @@ const TelegramService = {
     
     /**
      * Применение темы Telegram
+     * ОТКЛЮЧЕНО: используем свой дизайн вместо темы Telegram
      */
     _applyTelegramTheme(tg) {
+        // Не применяем тему Telegram — оставляем оригинальный дизайн
+        // Раскомментируйте код ниже, если хотите интеграцию с темой Telegram
+        
+        /*
         const colorScheme = tg.colorScheme;  // 'light' или 'dark'
         const themeParams = tg.themeParams;
         
@@ -193,6 +132,7 @@ const TelegramService = {
                 root.style.setProperty('--tg-button-text', themeParams.button_text_color);
             }
         }
+        */
     },
     
     /**
