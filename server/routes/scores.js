@@ -264,16 +264,21 @@ router.get('/user/telegram/:telegramId', async (req, res, next) => {
         }
         
         // Получаем пользователя
-        const [user] = await db.query(
+        let [user] = await db.query(
             'SELECT id, username, created_at FROM users WHERE telegram_id = ?',
             [telegramId]
         );
         
+        // Если пользователь не найден — создаём его
         if (!user) {
-            return res.status(HTTP.NOT_FOUND).json({
-                success: false,
-                error: 'Пользователь не найден',
-            });
+            const result = await db.query(
+                'INSERT INTO users (telegram_id, session_id) VALUES (?, UUID())',
+                [telegramId]
+            );
+            [user] = await db.query(
+                'SELECT id, username, created_at FROM users WHERE id = ?',
+                [result.insertId]
+            );
         }
         
         // Получаем статистику
