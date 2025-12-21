@@ -1447,7 +1447,8 @@ body {
 
 .leaderboard-tab {
     background: transparent;
-    border: 1px solid var(--border);
+    border: 2px solid var(--text-secondary);
+    color: var(--text);
     padding: 8px 16px;
     border-radius: 20px;
     font-size: 13px;
@@ -1459,6 +1460,12 @@ body {
     background: var(--text);
     color: var(--bg);
     border-color: var(--text);
+}
+
+/* Тёмная тема - более заметные границы для невыбранных табов */
+[data-theme="dark"] .leaderboard-tab:not(.active) {
+    border-color: #555;
+    color: #fff;
 }
 
 .leaderboard-table {
