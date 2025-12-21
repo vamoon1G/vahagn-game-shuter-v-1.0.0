@@ -36,6 +36,8 @@ router.post('/', createScoreLimiter(), validateGameResult, async (req, res, next
             gameMode = 'endless'
         } = req.body;
         
+        console.log('🔍 Auth data: telegramId=', telegramId, 'sessionId=', sessionId ? 'yes' : 'no');
+        
         // Вычисляем accuracy
         const accuracy = shotsFired > 0 ? targetsHit / shotsFired : 0;
         
@@ -44,28 +46,36 @@ router.post('/', createScoreLimiter(), validateGameResult, async (req, res, next
         
         // Приоритет 1: Telegram ID
         if (telegramId) {
-            [user] = await db.query(
+            console.log('🔍 Looking up user by telegramId:', telegramId);
+            const users = await db.query(
                 'SELECT id FROM users WHERE telegram_id = ?',
                 [telegramId]
             );
+            user = users[0];
+            console.log('🔍 Found user:', user);
             
             if (!user) {
                 // Создаём пользователя по Telegram ID
+                console.log('📝 Creating new user for telegramId:', telegramId);
                 const result = await db.query(
                     'INSERT INTO users (telegram_id, session_id) VALUES (?, UUID())',
                     [telegramId]
                 );
                 userId = result.insertId;
+                console.log('✅ Created user with id:', userId);
             } else {
                 userId = user.id;
+                console.log('✅ Using existing user:', userId);
             }
         }
         // Приоритет 2: Session ID
         else if (sessionId) {
-            [user] = await db.query(
+            console.log('🔍 Looking up user by sessionId');
+            const users = await db.query(
                 'SELECT id FROM users WHERE session_id = ?',
                 [sessionId]
             );
+            user = users[0];
             
             if (!user) {
                 const result = await db.query(
@@ -77,11 +87,14 @@ router.post('/', createScoreLimiter(), validateGameResult, async (req, res, next
                 userId = user.id;
             }
         } else {
+            console.log('❌ No auth data provided!');
             return res.status(HTTP.BAD_REQUEST).json({
                 success: false,
                 error: 'telegramId or sessionId required',
             });
         }
+        
+        console.log('💾 Saving score for userId:', userId, 'score:', score);
         
         // Сохраняем результат
         const result = await db.query(
@@ -90,6 +103,8 @@ router.post('/', createScoreLimiter(), validateGameResult, async (req, res, next
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             [userId, score, targetsHit, shotsFired, accuracy, maxCombo, durationMs, gameMode]
         );
+        
+        console.log('✅ Score saved with id:', result.insertId);
         
         // Получаем позицию в рейтинге
         const [rankResult] = await db.query(
