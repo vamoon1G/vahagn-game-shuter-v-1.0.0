@@ -5,7 +5,6 @@
 
 const { body, param, query, validationResult } = require('express-validator');
 const { GAME, USER, PAGINATION, LEADERBOARD_TYPES, HTTP } = require('../config/constants');
-const telegramLogger = require('../utils/telegramLogger');
 
 /**
  * Обработчик ошибок валидации
@@ -16,13 +15,8 @@ function handleValidationErrors(req, res, next) {
         // Безопасное логирование (без sensitive данных)
         const safeBody = { ...req.body };
         delete safeBody.initData;
-        const errorMsg = errors.array().map(e => `${e.path}: ${e.msg}`).join(', ');
         console.log('❌ Ошибка валидации:', JSON.stringify(safeBody, null, 2));
-        console.log('   Ошибки:', errorMsg);
-        
-        // Логируем в Telegram
-        telegramLogger.send(`Validation Error\nPath: ${req.path}\nBody: ${JSON.stringify(safeBody)}\nErrors: ${errorMsg}`, 'error');
-        
+        console.log('   Ошибки:', errors.array().map(e => `${e.path}: ${e.msg}`).join(', '));
         return res.status(HTTP.BAD_REQUEST).json({
             success: false,
             error: 'Ошибка валидации',

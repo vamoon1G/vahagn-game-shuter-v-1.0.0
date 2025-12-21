@@ -130,6 +130,126 @@ const SessionManager = {
 };
 
 // ============================================
+// DEBUG LOGGER (визуальные логи на экране)
+// ============================================
+const DebugLogger = {
+    _container: null,
+    _logs: [],
+    _maxLogs: 20,
+    _enabled: true,
+    
+    init() {
+        // Проверяем включены ли логи в конфиге
+        if (typeof window.APP_CONFIG !== 'undefined' && window.APP_CONFIG.DEBUG_LOGS === false) {
+            this._enabled = false;
+            return;
+        }
+        
+        // Создаём контейнер для логов
+        this._container = document.createElement('div');
+        this._container.id = 'debug-logs';
+        this._container.innerHTML = `
+            <div class="debug-header">
+                <span>📋 Логи</span>
+                <button onclick="DebugLogger.toggle()">−</button>
+                <button onclick="DebugLogger.close()">×</button>
+            </div>
+            <div class="debug-content"></div>
+        `;
+        this._container.style.cssText = `
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            width: 300px;
+            max-height: 40vh;
+            background: rgba(0,0,0,0.95);
+            color: #0f0;
+            font-family: monospace;
+            font-size: 10px;
+            border-radius: 8px;
+            z-index: 99999;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        `;
+        
+        const style = document.createElement('style');
+        style.textContent = `
+            #debug-logs .debug-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 6px 10px;
+                background: #222;
+                border-bottom: 1px solid #333;
+                gap: 4px;
+            }
+            #debug-logs .debug-header span { flex: 1; }
+            #debug-logs .debug-header button {
+                background: #333;
+                border: none;
+                color: #fff;
+                width: 22px;
+                height: 22px;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+            #debug-logs .debug-content {
+                max-height: 35vh;
+                overflow-y: auto;
+                padding: 6px;
+            }
+            #debug-logs .debug-content.collapsed { display: none; }
+            #debug-logs .log-entry {
+                padding: 3px 0;
+                border-bottom: 1px solid #222;
+                word-break: break-all;
+            }
+            #debug-logs .log-error { color: #f55; }
+            #debug-logs .log-success { color: #5f5; }
+            #debug-logs .log-info { color: #5af; }
+            #debug-logs .log-warn { color: #fa5; }
+        `;
+        document.head.appendChild(style);
+        document.body.appendChild(this._container);
+    },
+    
+    log(message, type = 'info') {
+        if (!this._enabled) return;
+        if (!this._container) this.init();
+        if (!this._container) return;
+        
+        const time = new Date().toLocaleTimeString();
+        this._logs.unshift({ time, message: String(message).substring(0, 200), type });
+        if (this._logs.length > this._maxLogs) this._logs.pop();
+        this._render();
+    },
+    
+    error(msg) { this.log(msg, 'error'); },
+    success(msg) { this.log(msg, 'success'); },
+    warn(msg) { this.log(msg, 'warn'); },
+    info(msg) { this.log(msg, 'info'); },
+    
+    _render() {
+        const content = this._container?.querySelector('.debug-content');
+        if (content) {
+            content.innerHTML = this._logs.map(l => 
+                `<div class="log-entry log-${l.type}">[${l.time}] ${l.message}</div>`
+            ).join('');
+        }
+    },
+    
+    toggle() {
+        const content = this._container?.querySelector('.debug-content');
+        if (content) content.classList.toggle('collapsed');
+    },
+    
+    close() {
+        if (this._container) this._container.style.display = 'none';
+    }
+};
+window.DebugLogger = DebugLogger;
+
+// ============================================
 // API SERVICE (с поддержкой Telegram)
 // ============================================
 const ApiService = {
@@ -144,6 +264,9 @@ const ApiService = {
     async request(endpoint, options = {}) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
+        
+        const method = options.method || 'GET';
+        DebugLogger.info(`${method} ${endpoint}`);
         
         try {
             const response = await fetch(`${this.getBaseUrl()}${endpoint}`, {
@@ -160,15 +283,17 @@ const ApiService = {
             const data = await response.json();
             
             if (!response.ok) {
+                DebugLogger.error(`${method} ${endpoint} → ${response.status}: ${data.error || 'Error'}`);
                 throw new Error(data.error || 'Ошибка сервера');
             }
             
+            DebugLogger.success(`${method} ${endpoint} → OK`);
             return data;
         } catch (error) {
             clearTimeout(timeoutId);
             
             if (error.name === 'AbortError') {
-                console.warn('API request timeout');
+                DebugLogger.warn(`${method} ${endpoint} → TIMEOUT`);
                 return null;
             }
             
@@ -180,14 +305,16 @@ const ApiService = {
     async submitScore(gameResult) {
         // Валидация на клиенте
         if (!gameResult || typeof gameResult.score !== 'number') {
-            console.error('Invalid game result');
+            DebugLogger.error('Invalid game result!');
             return null;
         }
         
         // Получаем данные аутентификации (Telegram или Session)
         const authData = SessionManager.getAuthData();
         
-        return this.request('/scores', {
+        DebugLogger.info(`Saving: score=${gameResult.score}, tgId=${authData.telegramId || 'none'}`);
+        
+        const result = await this.request('/scores', {
             method: 'POST',
             body: JSON.stringify({
                 ...authData,  // telegramId + initData или sessionId
@@ -199,6 +326,14 @@ const ApiService = {
                 gameMode: gameResult.gameMode || 'endless',
             }),
         });
+        
+        if (result?.success) {
+            DebugLogger.success(`Saved! Rank: #${result.data?.rank}`);
+        } else {
+            DebugLogger.error('Save failed!');
+        }
+        
+        return result;
     },
     
     async getLeaderboard(type = 'score', limit = 10) {
@@ -1499,8 +1634,13 @@ document.addEventListener('keydown', (e) => {
 // ИНИЦИАЛИЗАЦИЯ
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
+    // 0. Инициализируем визуальные логи
+    DebugLogger.init();
+    DebugLogger.info('App loaded');
+    
     // 1. Инициализируем SessionManager (и Telegram если доступен)
     SessionManager.init();
+    DebugLogger.info(`User: ${SessionManager.getDisplayName()}`);
     
     // 2. Загружаем рейтинг
     loadLeaderboard('score');
