@@ -6,7 +6,7 @@
 const API_CONFIG = Object.freeze({
     // Если сервер на том же origin - используем относительный путь
     BASE_URL: window.location.port === '3001' ? '/api' : 'http://localhost:3001/api',
-    TIMEOUT: 10000,
+    TIMEOUT: 30000,  // 30 секунд — Render бесплатный тариф имеет холодный старт
 });
 
 // ============================================
