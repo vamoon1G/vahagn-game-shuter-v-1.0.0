@@ -294,11 +294,13 @@ const ApiService = {
             
             if (error.name === 'AbortError') {
                 DebugLogger.warn(`${method} ${endpoint} → TIMEOUT`);
-                return null;
+                return { success: false, error: 'Timeout' };
             }
             
+            DebugLogger.error(`${method} ${endpoint} → ${error.message}`);
+            
             console.error('API Error:', error.message);
-            return null;
+            return { success: false, error: error.message };
         }
     },
     
@@ -314,23 +316,27 @@ const ApiService = {
         
         DebugLogger.info(`Saving: score=${gameResult.score}, tgId=${authData.telegramId || 'none'}`);
         
+        const bodyData = {
+            ...authData,  // telegramId + initData или sessionId
+            score: Math.max(0, Math.floor(gameResult.score)),
+            targetsHit: Math.max(0, Math.floor(gameResult.targetsHit)),
+            shotsFired: Math.max(0, Math.floor(gameResult.shotsFired)),
+            maxCombo: Math.max(1, Math.floor(gameResult.maxCombo)),
+            durationMs: Math.max(1000, Math.floor(gameResult.durationMs)),
+            gameMode: gameResult.gameMode || 'endless',
+        };
+        
+        DebugLogger.info(`Data: hits=${bodyData.targetsHit}, shots=${bodyData.shotsFired}, combo=${bodyData.maxCombo}, dur=${bodyData.durationMs}ms`);
+        
         const result = await this.request('/scores', {
             method: 'POST',
-            body: JSON.stringify({
-                ...authData,  // telegramId + initData или sessionId
-                score: Math.max(0, Math.floor(gameResult.score)),
-                targetsHit: Math.max(0, Math.floor(gameResult.targetsHit)),
-                shotsFired: Math.max(0, Math.floor(gameResult.shotsFired)),
-                maxCombo: Math.max(1, Math.floor(gameResult.maxCombo)),
-                durationMs: Math.max(1000, Math.floor(gameResult.durationMs)),
-                gameMode: gameResult.gameMode || 'endless',
-            }),
+            body: JSON.stringify(bodyData),
         });
         
         if (result?.success) {
             DebugLogger.success(`Saved! Rank: #${result.data?.rank}`);
         } else {
-            DebugLogger.error('Save failed!');
+            DebugLogger.error(`Save failed: ${result?.error || 'null response'}`);
         }
         
         return result;
