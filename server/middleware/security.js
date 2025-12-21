@@ -27,9 +27,9 @@ function httpsRedirect(req, res, next) {
         return next();
     }
     
-    // Редирект на HTTPS
+    // Редирект на HTTPS (302 - временный, не кэшируется браузером)
     const httpsUrl = `https://${req.hostname}${req.originalUrl}`;
-    res.redirect(301, httpsUrl);
+    res.redirect(302, httpsUrl);
 }
 
 /**

@@ -306,11 +306,19 @@ const ApiService = {
         DebugLogger.info(`${method} ${endpoint}`);
         
         try {
-            const response = await fetch(`${this.getBaseUrl()}${endpoint}`, {
+            // Добавляем timestamp для GET запросов чтобы избежать кэширования
+            let url = `${this.getBaseUrl()}${endpoint}`;
+            if (method === 'GET') {
+                const separator = url.includes('?') ? '&' : '?';
+                url += `${separator}_t=${Date.now()}`;
+            }
+            
+            const response = await fetch(url, {
                 ...options,
                 signal: controller.signal,
                 headers: {
                     'Content-Type': 'application/json',
+                    'Cache-Control': 'no-cache',
                     ...options.headers,
                 },
             });
@@ -1659,8 +1667,9 @@ btnToMenu.addEventListener('click', async () => {
     hub.classList.add('active');
     document.getElementById('bottom-nav').style.display = 'flex';
     
-    // Refresh leaderboard
+    // Обновляем данные после игры
     loadLeaderboard(currentLeaderboardType);
+    loadProfileData();
     
     // Корректно останавливаем камеру и сбрасываем состояние
     stopCamera();

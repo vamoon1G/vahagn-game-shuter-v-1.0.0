@@ -31,15 +31,6 @@
     --card-text: #ffffff;
 }
 
-/* Инвертировать иконки арсенала в тёмной теме */
-[data-theme="dark"] .nav-item .nav-icon img {
-    filter: invert(1);
-}
-
-[data-theme="dark"] .nav-item.active .nav-icon img {
-    filter: invert(0);
-}
-
 /* Иконки оружий в тёмной теме */
 [data-theme="dark"] .weapon-icon img {
     filter: invert(1);
@@ -290,22 +281,7 @@ body {
     stroke-width: 2.6;
 }
 
-.nav-icon img {
-    width: 22px;
-    height: 22px;
-    object-fit: contain;
-    opacity: 0.5;
-    transition: opacity 0.2s ease, filter 0.2s ease;
-}
-
-.nav-item:hover .nav-icon img {
-    opacity: 0.8;
-}
-
-.nav-item.active .nav-icon img {
-    opacity: 1;
-    filter: invert(1);
-}
+/* img styles removed - using SVG icons now */
 
 /* ============================================ */
 /* LEADERBOARD SCREEN */
