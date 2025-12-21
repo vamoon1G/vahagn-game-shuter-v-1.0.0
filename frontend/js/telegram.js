@@ -102,37 +102,17 @@ const TelegramService = {
     
     /**
      * Применение темы Telegram
-     * ОТКЛЮЧЕНО: используем свой дизайн вместо темы Telegram
+     * Используем только light/dark mode, без кастомных цветов Telegram
      */
     _applyTelegramTheme(tg) {
-        // Не применяем тему Telegram — оставляем оригинальный дизайн
-        // Раскомментируйте код ниже, если хотите интеграцию с темой Telegram
-        
-        /*
         const colorScheme = tg.colorScheme;  // 'light' или 'dark'
-        const themeParams = tg.themeParams;
         
+        // Применяем только тёмную/светлую тему, без цветов Telegram
         if (colorScheme === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+            document.documentElement.removeAttribute('data-theme');
         }
-        
-        // Применяем цвета Telegram к CSS переменным
-        if (themeParams) {
-            const root = document.documentElement;
-            if (themeParams.bg_color) {
-                root.style.setProperty('--tg-bg', themeParams.bg_color);
-            }
-            if (themeParams.text_color) {
-                root.style.setProperty('--tg-text', themeParams.text_color);
-            }
-            if (themeParams.button_color) {
-                root.style.setProperty('--tg-button', themeParams.button_color);
-            }
-            if (themeParams.button_text_color) {
-                root.style.setProperty('--tg-button-text', themeParams.button_text_color);
-            }
-        }
-        */
     },
     
     /**
