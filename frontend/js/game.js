@@ -162,6 +162,9 @@ const DebugLogger = {
             document.getElementById('debug-toggle-btn')?.addEventListener('click', () => this.toggle());
             document.getElementById('debug-close-btn')?.addEventListener('click', () => this.close());
         }, 0);
+        
+        // Добавляем кнопку теста POST
+        this._addTestButton();
         this._container.style.cssText = `
             position: fixed;
             top: 10px;
@@ -251,6 +254,34 @@ const DebugLogger = {
     
     close() {
         if (this._container) this._container.style.display = 'none';
+    },
+    
+    _addTestButton() {
+        const header = this._container?.querySelector('.debug-header');
+        if (!header) return;
+        
+        const testBtn = document.createElement('button');
+        testBtn.textContent = '🧪';
+        testBtn.title = 'Test POST';
+        testBtn.style.cssText = 'background:#355;font-size:12px;';
+        testBtn.addEventListener('click', async () => {
+            this.info('Testing POST...');
+            try {
+                const baseUrl = (typeof window.APP_CONFIG !== 'undefined' && window.APP_CONFIG.API_URL) 
+                    ? window.APP_CONFIG.API_URL.replace('/api', '') 
+                    : '';
+                const response = await fetch(`${baseUrl}/api/test`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ test: 'data', time: Date.now() }),
+                });
+                const data = await response.json();
+                this.success(`POST test: ${data.success ? 'OK!' : 'FAIL'}`);
+            } catch (error) {
+                this.error(`POST test: ${error.name}: ${error.message}`);
+            }
+        });
+        header.insertBefore(testBtn, header.firstChild.nextSibling);
     }
 };
 window.DebugLogger = DebugLogger;

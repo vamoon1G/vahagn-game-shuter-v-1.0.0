@@ -134,6 +134,16 @@ app.get('/health', (req, res) => {
     });
 });
 
+// POST test endpoint
+app.post('/api/test', (req, res) => {
+    console.log('📨 POST /api/test received:', req.body);
+    res.json({ 
+        success: true, 
+        message: 'POST works!',
+        received: req.body,
+    });
+});
+
 // API маршруты
 app.use('/api/auth', authRouter);
 app.use('/api/scores', scoresRouter);
